@@ -1,17 +1,26 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
-
+	"github.com/deVamshi/golang_food_delivery_api/internal/user"
 	"github.com/deVamshi/golang_food_delivery_api/internal/hotel"
 	"github.com/deVamshi/golang_food_delivery_api/pkg/dbcontext"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
 
+var(
+	userservice user.UserService
+	usercontroller user.UserController
+	ctx context.Context
+)
 func main() {
 	// load env vars
+	ant := 5
+	log.Println(ant)
+	ctx = context.Background()
 	APP_ENV, err := godotenv.Read("../.env")
 	if err != nil {
 		log.Fatal(err)
@@ -36,7 +45,12 @@ func main() {
 	v1 := r.Group("/v1")
 	{
 		hotel.RegisterHandlers(v1, hotel.NewService(hotel.NewRepository(dbClient)))
+		var usercollection = dbClient.Collection("users")
+		userservice = user.NewUserService(usercollection,ctx)
+		usercontroller = user.New(userservice)
+		usercontroller.RegisterUserRoutes(v1) 
 	}
+
 
 	server := &http.Server{
 		Addr:    ":8080",
