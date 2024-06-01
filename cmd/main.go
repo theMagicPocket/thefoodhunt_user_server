@@ -18,8 +18,6 @@ var(
 )
 func main() {
 	// load env vars
-	ant := 5
-	log.Println(ant)
 	ctx = context.Background()
 	APP_ENV, err := godotenv.Read("../.env")
 	if err != nil {
