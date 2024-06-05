@@ -4,8 +4,10 @@ import (
 	"context"
 	"log"
 	"net/http"
-	"github.com/deVamshi/golang_food_delivery_api/internal/user"
+
+	"github.com/deVamshi/golang_food_delivery_api/internal/fooditem"
 	"github.com/deVamshi/golang_food_delivery_api/internal/hotel"
+	"github.com/deVamshi/golang_food_delivery_api/internal/user"
 	"github.com/deVamshi/golang_food_delivery_api/pkg/dbcontext"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -16,6 +18,12 @@ var(
 	usercontroller user.UserController
 	ctx context.Context
 )
+
+var(
+	fooditemservice fooditem.FoodItemService
+	fooditemcontroller fooditem.FoodItemController
+)
+
 func main() {
 	// load env vars
 	log.Println("checkb")
@@ -48,6 +56,11 @@ func main() {
 		userservice = user.NewUserService(usercollection,ctx)
 		usercontroller = user.New(userservice)
 		usercontroller.RegisterUserRoutes(v1) 
+		var itemscollection = dbClient.Collection("fooditems")
+		fooditemservice = fooditem.NewFoodItemService(itemscollection,ctx)
+		fooditemcontroller = fooditem.New(fooditemservice)
+		fooditemcontroller.RegisterFoodItemRoutes(v1)
+
 	}
 
 
