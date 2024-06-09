@@ -7,6 +7,7 @@ import (
 
 	"github.com/deVamshi/golang_food_delivery_api/internal/fooditem"
 	"github.com/deVamshi/golang_food_delivery_api/internal/hotel"
+	"github.com/deVamshi/golang_food_delivery_api/internal/tokenverification"
 	"github.com/deVamshi/golang_food_delivery_api/internal/user"
 	"github.com/deVamshi/golang_food_delivery_api/pkg/dbcontext"
 	"github.com/gin-gonic/gin"
@@ -26,7 +27,6 @@ var(
 
 func main() {
 	// load env vars
-	log.Println("checkb")
 	ctx = context.Background()
 	APP_ENV, err := godotenv.Read("../.env")
 	if err != nil {
@@ -51,6 +51,7 @@ func main() {
 
 	v1 := r.Group("/v1")
 	{
+		v1.Use(tokenverification.AuthMiddleware())
 		hotel.RegisterHandlers(v1, hotel.NewService(hotel.NewRepository(dbClient)))
 		var usercollection = dbClient.Collection("users")
 		userservice = user.NewUserService(usercollection,ctx)
@@ -60,7 +61,6 @@ func main() {
 		fooditemservice = fooditem.NewFoodItemService(itemscollection,ctx)
 		fooditemcontroller = fooditem.New(fooditemservice)
 		fooditemcontroller.RegisterFoodItemRoutes(v1)
-
 	}
 
 
