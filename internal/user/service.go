@@ -48,7 +48,7 @@ func (u *UserServiceImpl) CreateUser(user *entity.User) error {
 
 func (u *UserServiceImpl) GetUser(userId *string) (*entity.User, error) {
 	var user *entity.User
-	query := bson.D{bson.E{Key: "user_id", Value: userId}}
+	query := bson.D{bson.E{Key: "_id", Value: userId}}
 	err := u.userCollection.FindOne(u.ctx, query).Decode(&user)
 	return user, err
 }
@@ -82,7 +82,7 @@ func (u *UserServiceImpl) GetAll() ([]*entity.User, error) {
 
 
 func (u *UserServiceImpl) UpdateUser(user *entity.User) error {
-	filter := bson.D{bson.E{Key: "user_id", Value: user.ID}}
+	filter := bson.D{bson.E{Key: "_id", Value: user.ID}}
 
 	// Initialize an empty map for the update document
 	updateFields := make(map[string]interface{})
@@ -140,7 +140,7 @@ func (u *UserServiceImpl) UpdateUser(user *entity.User) error {
 }
 
 func (u *UserServiceImpl) DeleteUser(userId *string) error {
-	filter := bson.D{bson.E{Key: "user_id", Value: userId}}
+	filter := bson.D{bson.E{Key: "_id", Value: userId}}
 	result, _ := u.userCollection.DeleteOne(u.ctx, filter)
 	if result.DeletedCount != 1 {
 		return errors.New("no matched document found for delete")
