@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	// "github.com/deVamshi/golang_food_delivery_api/internal/entity"
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,13 +16,15 @@ func AuthMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		_, err := ValidateFirebaseToken(token)
+		userId , _, err := ValidateFirebaseToken(token)
 		if err != nil {
 			log.Println(err)
+			
 			c.JSON(http.StatusForbidden, gin.H{"error": "Unauthorized"})
 			c.Abort()
 			return
 		}
+		c.Set("userId", userId)
 
 		// Token is valid, proceed with the next handler
 		c.Next()

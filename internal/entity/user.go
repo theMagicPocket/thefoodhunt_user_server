@@ -10,7 +10,7 @@ type UserAddress struct {
 
 // User represents a user with related details.
 type User struct {
-    ID           string        `bson:"user_id,omitempty" json:"user_id,omitempty"`
+    ID           string        `bson:"_id,omitempty" json:"user_id,omitempty"`
     Name         string        `bson:"name" json:"name"`
     Email        string        `bson:"email" json:"email"`
     Phone        string        `bson:"phone" json:"phone"`

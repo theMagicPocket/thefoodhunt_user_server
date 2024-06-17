@@ -20,7 +20,12 @@ func New(userService UserService) UserController {
 
 func (uc *UserController) CreateUser(ctx *gin.Context) {
 	var user entity.User
-	user.ID = entity.GenerateID()
+	userId, exists := ctx.Get("userId")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"message": "User ID not found in context"})
+		return
+	}
+	user.ID = userId.(string)
 	istLocation,_:= time.LoadLocation("Asia/Kolkata")
 	now := time.Now().In(istLocation)
 	formattedTime := now.Format("01-02-2006 15:04:05")
@@ -29,13 +34,18 @@ func (uc *UserController) CreateUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusBadRequest,gin.H{"message": err.Error()})
 	return
 	};
- err := uc.UserService.CreateUser(&user)
- if err != nil{
-  ctx.JSON(http.StatusBadGateway,gin.H{"message": err.Error()})
-  return
- }
-  ctx.JSON(http.StatusOK, gin.H{"message":"success","status": http.StatusOK,"userid":user.ID})
-}
+	
+	err := uc.UserService.CreateUser(&user)
+	if err != nil{
+		if err == ErrEmailExists {
+            ctx.JSON(http.StatusConflict, gin.H{"message": "User already found", "status": http.StatusConflict})
+            return
+        }
+        ctx.JSON(http.StatusBadGateway, gin.H{"message": err.Error()})
+        return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"message":"success","status": http.StatusOK,"userid":user.ID})
+	}
 
 func (uc *UserController) GetUser(ctx *gin.Context) {
 	userId := ctx.Param("id")

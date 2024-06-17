@@ -29,10 +29,21 @@ func NewUserService(userCollection *mongo.Collection, ctx context.Context) UserS
 		ctx:            ctx,
 	}
 }
+var ErrEmailExists = errors.New("email already in use")
 
 func (u *UserServiceImpl) CreateUser(user *entity.User) error {
-	_, err := u.userCollection.InsertOne(u.ctx, user)
-	return err
+	var existingUser entity.User
+    err := u.userCollection.FindOne(u.ctx, bson.M{"email": user.Email}).Decode(&existingUser)
+    if err == nil {
+        // Email already exists
+		
+        return ErrEmailExists
+    } else if err != mongo.ErrNoDocuments {
+        // An error occurred other than "no documents found"
+        return err
+    }
+	_, errr := u.userCollection.InsertOne(u.ctx, user)
+	return errr
 }
 
 func (u *UserServiceImpl) GetUser(userId *string) (*entity.User, error) {
