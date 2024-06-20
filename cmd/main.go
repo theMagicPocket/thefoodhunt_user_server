@@ -4,11 +4,11 @@ import (
 	"context"
 	"log"
 	"net/http"
-
 	"github.com/deVamshi/golang_food_delivery_api/internal/fooditem"
 	"github.com/deVamshi/golang_food_delivery_api/internal/hotel"
 	"github.com/deVamshi/golang_food_delivery_api/internal/tokenverification"
 	"github.com/deVamshi/golang_food_delivery_api/internal/user"
+	"github.com/deVamshi/golang_food_delivery_api/internal/voucher"
 	"github.com/deVamshi/golang_food_delivery_api/pkg/dbcontext"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -23,6 +23,8 @@ var(
 var(
 	fooditemservice fooditem.FoodItemService
 	fooditemcontroller fooditem.FoodItemController
+	voucherservice voucher.VoucherService
+	vouchercontroller voucher.VoucherController
 )
 
 func main() {
@@ -61,6 +63,10 @@ func main() {
 		fooditemservice = fooditem.NewFoodItemService(itemscollection,ctx)
 		fooditemcontroller = fooditem.New(fooditemservice)
 		fooditemcontroller.RegisterFoodItemRoutes(v1)
+		var voucherscollection = dbClient.Collection("vouchers")
+		voucherservice = voucher.NewVoucherService(voucherscollection,ctx)
+		vouchercontroller = voucher.New(voucherservice)
+		vouchercontroller.RegisterVoucherRoutes(v1)
 	}
 
 
