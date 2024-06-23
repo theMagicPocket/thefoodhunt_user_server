@@ -4,8 +4,10 @@ import (
 	"context"
 	"log"
 	"net/http"
+
 	"github.com/deVamshi/golang_food_delivery_api/internal/fooditem"
 	"github.com/deVamshi/golang_food_delivery_api/internal/hotel"
+	order "github.com/deVamshi/golang_food_delivery_api/internal/orders"
 	"github.com/deVamshi/golang_food_delivery_api/internal/tokenverification"
 	"github.com/deVamshi/golang_food_delivery_api/internal/user"
 	"github.com/deVamshi/golang_food_delivery_api/internal/voucher"
@@ -25,6 +27,8 @@ var(
 	fooditemcontroller fooditem.FoodItemController
 	voucherservice voucher.VoucherService
 	vouchercontroller voucher.VoucherController
+	orderservice order.OrderService
+	ordercontroller order.OrderController
 )
 
 func main() {
@@ -67,8 +71,11 @@ func main() {
 		voucherservice = voucher.NewVoucherService(voucherscollection,ctx)
 		vouchercontroller = voucher.New(voucherservice)
 		vouchercontroller.RegisterVoucherRoutes(v1)
+		var orderscollection = dbClient.Collection("orders")
+		orderservice = order.NewOrderService(orderscollection,ctx)
+		ordercontroller = order.New(orderservice)
+		ordercontroller.RegisterOrderRoutes(v1)
 	}
-
 
 	server := &http.Server{
 		Addr:    ":8080",
