@@ -4,10 +4,10 @@ import (
 	"context"
 	"log"
 	"net/http"
-
 	"github.com/deVamshi/golang_food_delivery_api/internal/fooditem"
 	"github.com/deVamshi/golang_food_delivery_api/internal/hotel"
 	order "github.com/deVamshi/golang_food_delivery_api/internal/orders"
+	"github.com/deVamshi/golang_food_delivery_api/internal/payments"
 	"github.com/deVamshi/golang_food_delivery_api/internal/tokenverification"
 	"github.com/deVamshi/golang_food_delivery_api/internal/user"
 	"github.com/deVamshi/golang_food_delivery_api/internal/voucher"
@@ -54,27 +54,33 @@ func main() {
 		log.Fatal(err)
 		return
 	}
-
+	
 	v1 := r.Group("/v1")
 	{
 		v1.Use(tokenverification.AuthMiddleware())
 		hotel.RegisterHandlers(v1, hotel.NewService(hotel.NewRepository(dbClient)))
+		// users
 		var usercollection = dbClient.Collection("users")
 		userservice = user.NewUserService(usercollection,ctx)
 		usercontroller = user.New(userservice)
 		usercontroller.RegisterUserRoutes(v1) 
+		// fooditems
 		var itemscollection = dbClient.Collection("fooditems")
 		fooditemservice = fooditem.NewFoodItemService(itemscollection,ctx)
 		fooditemcontroller = fooditem.New(fooditemservice)
 		fooditemcontroller.RegisterFoodItemRoutes(v1)
+		// vouchers
 		var voucherscollection = dbClient.Collection("vouchers")
 		voucherservice = voucher.NewVoucherService(voucherscollection,ctx)
 		vouchercontroller = voucher.New(voucherservice)
 		vouchercontroller.RegisterVoucherRoutes(v1)
+		// orders
 		var orderscollection = dbClient.Collection("orders")
 		orderservice = order.NewOrderService(orderscollection,ctx)
 		ordercontroller = order.New(orderservice)
 		ordercontroller.RegisterOrderRoutes(v1)
+		// payments
+		payments.RegisterPaymentRoutes(v1)
 	}
 
 	server := &http.Server{
@@ -90,3 +96,9 @@ func main() {
 	server.ListenAndServe()
 
 }
+
+
+
+
+
+  
