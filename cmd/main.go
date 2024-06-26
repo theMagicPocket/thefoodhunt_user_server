@@ -4,6 +4,8 @@ import (
 	"context"
 	"log"
 	"net/http"
+
+	"github.com/deVamshi/golang_food_delivery_api/internal/deliveryfee"
 	"github.com/deVamshi/golang_food_delivery_api/internal/fooditem"
 	"github.com/deVamshi/golang_food_delivery_api/internal/hotel"
 	order "github.com/deVamshi/golang_food_delivery_api/internal/orders"
@@ -81,6 +83,8 @@ func main() {
 		ordercontroller.RegisterOrderRoutes(v1)
 		// payments
 		payments.RegisterPaymentRoutes(v1)
+		//distance calculator and estimated delivery fee
+		deliveryfee.RegisterDistanceRoutes(v1)
 	}
 
 	server := &http.Server{
@@ -94,7 +98,6 @@ func main() {
 	// }()
 
 	server.ListenAndServe()
-
 }
 
 
