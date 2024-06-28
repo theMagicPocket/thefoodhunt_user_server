@@ -8,6 +8,7 @@ import (
 	"github.com/deVamshi/golang_food_delivery_api/internal/deliveryfee"
 	"github.com/deVamshi/golang_food_delivery_api/internal/fooditem"
 	"github.com/deVamshi/golang_food_delivery_api/internal/hotel"
+	"github.com/deVamshi/golang_food_delivery_api/internal/matrixapi"
 	order "github.com/deVamshi/golang_food_delivery_api/internal/orders"
 	"github.com/deVamshi/golang_food_delivery_api/internal/payments"
 	"github.com/deVamshi/golang_food_delivery_api/internal/tokenverification"
@@ -85,6 +86,8 @@ func main() {
 		payments.RegisterPaymentRoutes(v1)
 		//distance calculator and estimated delivery fee
 		deliveryfee.RegisterDistanceRoutes(v1)
+		// exact distance calculation using google matrix api
+		matrixapi.RegisterDistanceMatrixRoutes(v1)
 	}
 
 	server := &http.Server{
