@@ -22,6 +22,7 @@ type FoodItemService interface {
 	UpdateFoodItem(*entity.FoodItem) error
 	DeleteFoodItem(*string) error
     GiveRating(*string,entity.RatingRequest) (*entity.FoodItem,error) 
+    GetMenu(*string)([]*entity.FoodItem, error)
 }
 
 func NewFoodItemService(FoodItemCollection *mongo.Collection, ctx context.Context) FoodItemService {
@@ -192,3 +193,30 @@ func (f *FoodItemServiceImpl) GiveRating(fooditemId *string, ratingRequest entit
 }
 
 
+func (f *FoodItemServiceImpl) GetMenu(restaurantId *string) ([]*entity.FoodItem, error) {
+	var fooditems []*entity.FoodItem
+	query := bson.D{bson.E{Key: "restaurant_id", Value: *restaurantId}}
+	cursor, err := f.FoodItemCollection.Find(f.ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	for cursor.Next(f.ctx) {
+		var fooditem entity.FoodItem
+		err := cursor.Decode(&fooditem)
+		if err != nil {
+			return nil, err
+		}
+		fooditems = append(fooditems, &fooditem)
+	}
+
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
+
+	cursor.Close(f.ctx)
+
+	if len(fooditems) == 0 {
+		return nil, errors.New("no food items found for this restaurant")
+	}
+	return fooditems, nil
+}

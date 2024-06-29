@@ -106,6 +106,16 @@ func (fc *FoodItemController) GiveRating(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"message": "success", "status": http.StatusOK, "updated": updatedFoodItem})
 }
 
+func (fc *FoodItemController) GetMenu(ctx *gin.Context) {
+	fooditemId := ctx.Param("id")
+	fooditems, err := fc.FoodItemService.GetMenu(&fooditemId)
+	if err != nil {
+		ctx.JSON(http.StatusBadGateway, gin.H{"message": err.Error()})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"statuscode": http.StatusOK, "data":fooditems})
+}
+
 
 func (fc *FoodItemController) RegisterFoodItemRoutes(rg *gin.RouterGroup) {
 	fooditemroute := rg.Group("/fooditem")
@@ -115,4 +125,5 @@ func (fc *FoodItemController) RegisterFoodItemRoutes(rg *gin.RouterGroup) {
 	fooditemroute.PATCH("/update/:id", fc.UpdateFoodItem)
 	fooditemroute.DELETE("/delete/:id", fc.DeleteFoodItem)
 	fooditemroute.POST("/rating/:id", fc.GiveRating)
+	fooditemroute.GET("/menu/:id", fc.GetMenu)
 }

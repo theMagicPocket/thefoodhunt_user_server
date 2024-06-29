@@ -7,11 +7,13 @@ import (
 
 	"github.com/deVamshi/golang_food_delivery_api/internal/deliveryfee"
 	"github.com/deVamshi/golang_food_delivery_api/internal/fooditem"
-	"github.com/deVamshi/golang_food_delivery_api/internal/hotel"
+	hotel "github.com/deVamshi/golang_food_delivery_api/internal/hotels"
+
+	// "github.com/deVamshi/golang_food_delivery_api/internal/hotel"
 	"github.com/deVamshi/golang_food_delivery_api/internal/matrixapi"
 	order "github.com/deVamshi/golang_food_delivery_api/internal/orders"
 	"github.com/deVamshi/golang_food_delivery_api/internal/payments"
-	"github.com/deVamshi/golang_food_delivery_api/internal/tokenverification"
+	// "github.com/deVamshi/golang_food_delivery_api/internal/tokenverification"
 	"github.com/deVamshi/golang_food_delivery_api/internal/user"
 	"github.com/deVamshi/golang_food_delivery_api/internal/voucher"
 	"github.com/deVamshi/golang_food_delivery_api/pkg/dbcontext"
@@ -32,6 +34,9 @@ var(
 	vouchercontroller voucher.VoucherController
 	orderservice order.OrderService
 	ordercontroller order.OrderController
+	// hotels
+	hotelservice hotel.HotelService
+	hotelcontroller hotel.HotelController
 )
 
 func main() {
@@ -60,8 +65,18 @@ func main() {
 	
 	v1 := r.Group("/v1")
 	{
-		v1.Use(tokenverification.AuthMiddleware())
-		hotel.RegisterHandlers(v1, hotel.NewService(hotel.NewRepository(dbClient)))
+		// v1.Use(tokenverification.AuthMiddleware())
+		// hotel.RegisterHandlers(v1, hotel.NewService(hotel.NewRepository(dbClient)))
+		// vouchers
+		var voucherscollection = dbClient.Collection("vouchers")
+		voucherservice = voucher.NewVoucherService(voucherscollection,ctx)
+		vouchercontroller = voucher.New(voucherservice)
+		vouchercontroller.RegisterVoucherRoutes(v1)
+		// hotels
+		var hotelscollection = dbClient.Collection("hotels")
+		hotelservice = hotel.NewHotelService(hotelscollection,voucherscollection,ctx)
+		hotelcontroller = hotel.New(hotelservice)
+		hotelcontroller.RegisterHotelRoutes(v1)
 		// users
 		var usercollection = dbClient.Collection("users")
 		userservice = user.NewUserService(usercollection,ctx)
@@ -72,11 +87,6 @@ func main() {
 		fooditemservice = fooditem.NewFoodItemService(itemscollection,ctx)
 		fooditemcontroller = fooditem.New(fooditemservice)
 		fooditemcontroller.RegisterFoodItemRoutes(v1)
-		// vouchers
-		var voucherscollection = dbClient.Collection("vouchers")
-		voucherservice = voucher.NewVoucherService(voucherscollection,ctx)
-		vouchercontroller = voucher.New(voucherservice)
-		vouchercontroller.RegisterVoucherRoutes(v1)
 		// orders
 		var orderscollection = dbClient.Collection("orders")
 		orderservice = order.NewOrderService(orderscollection,ctx)
