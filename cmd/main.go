@@ -13,7 +13,7 @@ import (
 	"github.com/deVamshi/golang_food_delivery_api/internal/matrixapi"
 	order "github.com/deVamshi/golang_food_delivery_api/internal/orders"
 	"github.com/deVamshi/golang_food_delivery_api/internal/payments"
-	// "github.com/deVamshi/golang_food_delivery_api/internal/tokenverification"
+	"github.com/deVamshi/golang_food_delivery_api/internal/tokenverification"
 	"github.com/deVamshi/golang_food_delivery_api/internal/user"
 	"github.com/deVamshi/golang_food_delivery_api/internal/voucher"
 	"github.com/deVamshi/golang_food_delivery_api/pkg/dbcontext"
@@ -65,7 +65,7 @@ func main() {
 	
 	v1 := r.Group("/v1")
 	{
-		// v1.Use(tokenverification.AuthMiddleware())
+		v1.Use(tokenverification.AuthMiddleware())
 		// hotel.RegisterHandlers(v1, hotel.NewService(hotel.NewRepository(dbClient)))
 		// vouchers
 		var voucherscollection = dbClient.Collection("vouchers")

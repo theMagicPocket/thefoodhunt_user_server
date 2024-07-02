@@ -24,6 +24,8 @@ func AuthMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
+		log.Println("token verification")
+		log.Println(userId)
 		c.Set("userId", userId)
 
 		// Token is valid, proceed with the next handler
