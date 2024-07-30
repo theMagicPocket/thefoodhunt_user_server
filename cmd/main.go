@@ -7,9 +7,8 @@ import (
 
 	"github.com/deVamshi/golang_food_delivery_api/internal/deliveryfee"
 	"github.com/deVamshi/golang_food_delivery_api/internal/fooditem"
-	hotel "github.com/deVamshi/golang_food_delivery_api/internal/hotels"
+	"github.com/deVamshi/golang_food_delivery_api/internal/hotels"
 
-	// "github.com/deVamshi/golang_food_delivery_api/internal/hotel"
 	"github.com/deVamshi/golang_food_delivery_api/internal/matrixapi"
 	order "github.com/deVamshi/golang_food_delivery_api/internal/orders"
 	"github.com/deVamshi/golang_food_delivery_api/internal/payments"
@@ -21,22 +20,19 @@ import (
 	"github.com/joho/godotenv"
 )
 
-var(
-	userservice user.UserService
+var (
+	userservice    user.UserService
 	usercontroller user.UserController
-	ctx context.Context
+	ctx            context.Context
 )
 
-var(
-	fooditemservice fooditem.FoodItemService
+var (
+	fooditemservice    fooditem.FoodItemService
 	fooditemcontroller fooditem.FoodItemController
-	voucherservice voucher.VoucherService
-	vouchercontroller voucher.VoucherController
-	orderservice order.OrderService
-	ordercontroller order.OrderController
-	// hotels
-	hotelservice hotel.HotelService
-	hotelcontroller hotel.HotelController
+	voucherservice     voucher.VoucherService
+	vouchercontroller  voucher.VoucherController
+	orderservice       order.OrderService
+	ordercontroller    order.OrderController
 )
 
 func main() {
@@ -62,34 +58,33 @@ func main() {
 		log.Fatal(err)
 		return
 	}
-	
+
 	v1 := r.Group("/v1")
 	{
 		v1.Use(tokenverification.AuthMiddleware())
 		// hotel.RegisterHandlers(v1, hotel.NewService(hotel.NewRepository(dbClient)))
 		// vouchers
 		var voucherscollection = dbClient.Collection("vouchers")
-		voucherservice = voucher.NewVoucherService(voucherscollection,ctx)
+		voucherservice = voucher.NewVoucherService(voucherscollection, ctx)
 		vouchercontroller = voucher.New(voucherservice)
 		vouchercontroller.RegisterVoucherRoutes(v1)
 		// hotels
-		var hotelscollection = dbClient.Collection("hotels")
-		hotelservice = hotel.NewHotelService(hotelscollection,voucherscollection,ctx)
-		hotelcontroller = hotel.New(hotelservice)
-		hotelcontroller.RegisterHotelRoutes(v1)
+		hotels.RegisterHandlers(v1,
+			hotels.NewService(
+				hotels.NewRepository(&ctx, dbClient)))
 		// users
 		var usercollection = dbClient.Collection("users")
-		userservice = user.NewUserService(usercollection,ctx)
+		userservice = user.NewUserService(usercollection, ctx)
 		usercontroller = user.New(userservice)
-		usercontroller.RegisterUserRoutes(v1) 
+		usercontroller.RegisterUserRoutes(v1)
 		// fooditems
 		var itemscollection = dbClient.Collection("fooditems")
-		fooditemservice = fooditem.NewFoodItemService(itemscollection,ctx)
+		fooditemservice = fooditem.NewFoodItemService(itemscollection, ctx)
 		fooditemcontroller = fooditem.New(fooditemservice)
 		fooditemcontroller.RegisterFoodItemRoutes(v1)
 		// orders
 		var orderscollection = dbClient.Collection("orders")
-		orderservice = order.NewOrderService(orderscollection,ctx)
+		orderservice = order.NewOrderService(orderscollection, ctx)
 		ordercontroller = order.New(orderservice)
 		ordercontroller.RegisterOrderRoutes(v1)
 		// payments
@@ -112,9 +107,3 @@ func main() {
 
 	server.ListenAndServe()
 }
-
-
-
-
-
-  
