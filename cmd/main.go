@@ -2,14 +2,13 @@ package main
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/deVamshi/golang_food_delivery_api/internal/deliveryfee"
 	"github.com/deVamshi/golang_food_delivery_api/internal/fooditem"
 	"github.com/deVamshi/golang_food_delivery_api/internal/hotels"
-	"github.com/deVamshi/golang_food_delivery_api/internal/tokenverification"
 
 	"github.com/deVamshi/golang_food_delivery_api/internal/matrixapi"
 	order "github.com/deVamshi/golang_food_delivery_api/internal/orders"
@@ -17,6 +16,7 @@ import (
 	"github.com/deVamshi/golang_food_delivery_api/internal/user"
 	"github.com/deVamshi/golang_food_delivery_api/internal/voucher"
 	"github.com/deVamshi/golang_food_delivery_api/pkg/dbcontext"
+	"github.com/deVamshi/golang_food_delivery_api/pkg/log"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -37,12 +37,15 @@ var (
 )
 
 func main() {
-	// load env vars
+
+	logger := log.New()
+
 	ctx = context.Background()
+	// load env vars
 	APP_ENV, err := godotenv.Read(".env")
 	if err != nil {
-		log.Fatal(err)
-		log.Fatal("Error loading .env file")
+		logger.Fatal(err)
+		logger.Fatal("Error loading .env file")
 	}
 
 	r := gin.Default()
@@ -50,14 +53,13 @@ func main() {
 	dbClient, err := dbcontext.ConnectDB(APP_ENV["MONGOURI"])
 	defer func() {
 		if err := dbcontext.DisconnectDB(); err != nil {
-			log.Fatal(err)
+			logger.Fatal(err)
 		}
-		log.Print("Disconnected to DB\nBye!")
+		logger.Info("Disconnected to DB\nBye!")
 	}()
 
 	if err != nil {
-		log.Fatal(err)
-		return
+		logger.Fatal(err)
 	}
 
 	r.GET("/", func(ctx *gin.Context) {
@@ -66,7 +68,7 @@ func main() {
 
 	v1 := r.Group("/v1")
 	{
-		v1.Use(tokenverification.AuthMiddleware())
+		// v1.Use(tokenverification.AuthMiddleware())
 		// hotel.RegisterHandlers(v1, hotel.NewService(hotel.NewRepository(dbClient)))
 		// vouchers
 		var voucherscollection = dbClient.Collection("vouchers")
@@ -74,9 +76,7 @@ func main() {
 		vouchercontroller = voucher.New(voucherservice)
 		vouchercontroller.RegisterVoucherRoutes(v1)
 		// hotels
-		hotels.RegisterHandlers(v1,
-			hotels.NewService(
-				hotels.NewRepository(&ctx, dbClient)))
+		hotels.RegisterHandlers(v1, hotels.NewService(hotels.NewRepository(dbClient)), logger)
 		// users
 		var usercollection = dbClient.Collection("users")
 		userservice = user.NewUserService(usercollection, ctx)
@@ -106,14 +106,15 @@ func main() {
 	}
 
 	server := &http.Server{
-		Addr:    ":" + port,
-		Handler: r,
+		Addr:         ":" + port,
+		Handler:      r,
+		IdleTimeout:  time.Minute,
+		ReadTimeout:  time.Second * 5,
+		WriteTimeout: time.Second * 10,
 	}
 
-	// func() {
-	// 	time.Sleep(3 * time.Second)
-	// 	server.Shutdown(context.Background())
-	// }()
+	// logger.Fatal("unknown error occured")
 
-	server.ListenAndServe()
+	err = server.ListenAndServe()
+	logger.Fatal(err)
 }

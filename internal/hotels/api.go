@@ -1,21 +1,22 @@
 package hotels
 
 import (
-	"log"
 	"net/http"
 	"time"
 
 	"github.com/deVamshi/golang_food_delivery_api/internal/entity"
+	"github.com/deVamshi/golang_food_delivery_api/pkg/log"
 	"github.com/gin-gonic/gin"
 )
 
 type resource struct {
 	service Service
+	logger  log.AppLogger
 }
 
-func RegisterHandlers(rg *gin.RouterGroup, service Service) {
+func RegisterHandlers(rg *gin.RouterGroup, service Service, logger log.AppLogger) {
 
-	res := resource{service: service}
+	res := resource{service: service, logger: logger}
 
 	hotelRoute := rg.Group("/hotel")
 	hotelRoute.POST("/create", res.CreateHotel)
@@ -47,6 +48,9 @@ func (r resource) CreateHotel(ctx *gin.Context) {
 }
 
 func (r resource) GetHotel(ctx *gin.Context) {
+
+	r.logger.Info("GETTING ALL HOTELS")
+
 	hotelId := ctx.Param("id")
 	hotel, err := r.service.GetHotel(hotelId)
 	if err != nil {
@@ -106,7 +110,7 @@ func (r resource) GetNearbyHotels(c *gin.Context) {
 		return
 	}
 
-	log.Println(userCoordinates.Dist)
+	r.logger.Info(userCoordinates.Dist)
 	if userCoordinates.Dist == 0 {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "please give distance"})
 		return

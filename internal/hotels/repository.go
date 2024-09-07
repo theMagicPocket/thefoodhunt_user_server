@@ -23,7 +23,7 @@ type repository struct {
 	hotels *mongo.Collection
 }
 
-func NewRepository(ctxt *context.Context, db *mongo.Database) Repository {
+func NewRepository(db *mongo.Database) Repository {
 	return repository{db: db, hotels: db.Collection(C.HOTELS_COLLECTION)}
 }
 

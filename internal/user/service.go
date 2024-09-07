@@ -29,19 +29,19 @@ func NewUserService(userCollection *mongo.Collection, ctx context.Context) UserS
 		ctx:            ctx,
 	}
 }
+
 var ErrEmailExists = errors.New("email already in use")
 
 func (u *UserServiceImpl) CreateUser(user *entity.User) error {
 	var existingUser entity.User
-    err := u.userCollection.FindOne(u.ctx, bson.M{"email": user.Email}).Decode(&existingUser)
-    if err == nil {
-        // Email already exists
-		
-        return ErrEmailExists
-    } else if err != mongo.ErrNoDocuments {
-        // An error occurred other than "no documents found"
-        return err
-    }
+	err := u.userCollection.FindOne(u.ctx, bson.M{"email": user.Email}).Decode(&existingUser)
+	if err == nil {
+		// Email already exists
+		return ErrEmailExists
+	} else if err != mongo.ErrNoDocuments {
+		// An error occurred other than "no documents found"
+		return err
+	}
 	_, errr := u.userCollection.InsertOne(u.ctx, user)
 	return errr
 }
@@ -80,7 +80,6 @@ func (u *UserServiceImpl) GetAll() ([]*entity.User, error) {
 	return users, nil
 }
 
-
 func (u *UserServiceImpl) UpdateUser(user *entity.User) error {
 	filter := bson.D{bson.E{Key: "_id", Value: user.ID}}
 
@@ -89,7 +88,7 @@ func (u *UserServiceImpl) UpdateUser(user *entity.User) error {
 
 	// Dynamically append fields to the update document if they are not zero values
 	if user.Name != "" {
-		updateFields["Name"] = user.Name
+		updateFields["name"] = user.Name
 	}
 	if user.Email != "" {
 		updateFields["email"] = user.Email
@@ -119,6 +118,19 @@ func (u *UserServiceImpl) UpdateUser(user *entity.User) error {
 			}
 			if address.Pincode != "" {
 				updateFields[addressPrefix+"pincode"] = address.Pincode
+			}
+			if address.PhoneNumber != "" {
+				updateFields[addressPrefix+"phone_number"] = address.PhoneNumber
+			}
+
+			if address.Landmark != "" {
+				updateFields[addressPrefix+"landmark"] = address.Landmark
+			}
+			if address.IsActive == true || address.IsActive == false {
+				updateFields[addressPrefix+"is_active"] = address.IsActive
+			}
+			if address.Name != "" {
+				updateFields[addressPrefix+"name"] = address.Name
 			}
 		}
 	}

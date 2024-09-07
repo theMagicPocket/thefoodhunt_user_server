@@ -6,6 +6,7 @@ import (
 
 	U "github.com/deVamshi/golang_food_delivery_api/internal"
 	"github.com/deVamshi/golang_food_delivery_api/internal/entity"
+	"github.com/deVamshi/golang_food_delivery_api/pkg/log"
 )
 
 type Service interface {
@@ -18,7 +19,8 @@ type Service interface {
 }
 
 type service struct {
-	repo Repository
+	repo   Repository
+	logger log.AppLogger
 }
 
 func NewService(repo Repository) Service {

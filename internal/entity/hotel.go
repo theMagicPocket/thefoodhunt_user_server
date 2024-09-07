@@ -1,7 +1,5 @@
 package entity
 
-
-
 // type Hotel struct {
 // 	ID        primitive.ObjectID `bson:"_id,omitempty"`
 // 	HotelName string             `bson:"hotel_name"`
@@ -34,4 +32,5 @@ type RestaurantAddress struct {
     Street  string `bson:"street,omitempty" json:"street,omitempty"`
     DoorNo  string `bson:"doorNo,omitempty" json:"doorno,omitempty"`
     Pincode string `bson:"pincode,omitempty" json:"pincode,omitempty"`
+
 }
