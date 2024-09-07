@@ -59,6 +59,10 @@ func main() {
 		return
 	}
 
+	r.GET("/", func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, gin.H{"status": "ok", "message": "welcome to yummy-foods"})
+	})
+
 	v1 := r.Group("/v1")
 	{
 		v1.Use(tokenverification.AuthMiddleware())
