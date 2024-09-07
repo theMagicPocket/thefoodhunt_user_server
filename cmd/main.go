@@ -21,28 +21,28 @@ import (
 	"github.com/joho/godotenv"
 )
 
-var(
-	userservice user.UserService
+var (
+	userservice    user.UserService
 	usercontroller user.UserController
-	ctx context.Context
+	ctx            context.Context
 )
 
-var(
-	fooditemservice fooditem.FoodItemService
+var (
+	fooditemservice    fooditem.FoodItemService
 	fooditemcontroller fooditem.FoodItemController
-	voucherservice voucher.VoucherService
-	vouchercontroller voucher.VoucherController
-	orderservice order.OrderService
-	ordercontroller order.OrderController
+	voucherservice     voucher.VoucherService
+	vouchercontroller  voucher.VoucherController
+	orderservice       order.OrderService
+	ordercontroller    order.OrderController
 	// hotels
-	hotelservice hotel.HotelService
+	hotelservice    hotel.HotelService
 	hotelcontroller hotel.HotelController
 )
 
 func main() {
 	// load env vars
 	ctx = context.Background()
-	APP_ENV, err := godotenv.Read("../.env")
+	APP_ENV, err := godotenv.Read(".env")
 	if err != nil {
 		log.Fatal(err)
 		log.Fatal("Error loading .env file")
@@ -62,34 +62,34 @@ func main() {
 		log.Fatal(err)
 		return
 	}
-	
+
 	v1 := r.Group("/v1")
 	{
 		v1.Use(tokenverification.AuthMiddleware())
 		// hotel.RegisterHandlers(v1, hotel.NewService(hotel.NewRepository(dbClient)))
 		// vouchers
 		var voucherscollection = dbClient.Collection("vouchers")
-		voucherservice = voucher.NewVoucherService(voucherscollection,ctx)
+		voucherservice = voucher.NewVoucherService(voucherscollection, ctx)
 		vouchercontroller = voucher.New(voucherservice)
 		vouchercontroller.RegisterVoucherRoutes(v1)
 		// hotels
 		var hotelscollection = dbClient.Collection("hotels")
-		hotelservice = hotel.NewHotelService(hotelscollection,voucherscollection,ctx)
+		hotelservice = hotel.NewHotelService(hotelscollection, voucherscollection, ctx)
 		hotelcontroller = hotel.New(hotelservice)
 		hotelcontroller.RegisterHotelRoutes(v1)
 		// users
 		var usercollection = dbClient.Collection("users")
-		userservice = user.NewUserService(usercollection,ctx)
+		userservice = user.NewUserService(usercollection, ctx)
 		usercontroller = user.New(userservice)
-		usercontroller.RegisterUserRoutes(v1) 
+		usercontroller.RegisterUserRoutes(v1)
 		// fooditems
 		var itemscollection = dbClient.Collection("fooditems")
-		fooditemservice = fooditem.NewFoodItemService(itemscollection,ctx)
+		fooditemservice = fooditem.NewFoodItemService(itemscollection, ctx)
 		fooditemcontroller = fooditem.New(fooditemservice)
 		fooditemcontroller.RegisterFoodItemRoutes(v1)
 		// orders
 		var orderscollection = dbClient.Collection("orders")
-		orderservice = order.NewOrderService(orderscollection,ctx)
+		orderservice = order.NewOrderService(orderscollection, ctx)
 		ordercontroller = order.New(orderservice)
 		ordercontroller.RegisterOrderRoutes(v1)
 		// payments
@@ -112,9 +112,3 @@ func main() {
 
 	server.ListenAndServe()
 }
-
-
-
-
-
-  
