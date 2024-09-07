@@ -4,15 +4,16 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/deVamshi/golang_food_delivery_api/internal/deliveryfee"
 	"github.com/deVamshi/golang_food_delivery_api/internal/fooditem"
 	"github.com/deVamshi/golang_food_delivery_api/internal/hotels"
+	"github.com/deVamshi/golang_food_delivery_api/internal/tokenverification"
 
 	"github.com/deVamshi/golang_food_delivery_api/internal/matrixapi"
 	order "github.com/deVamshi/golang_food_delivery_api/internal/orders"
 	"github.com/deVamshi/golang_food_delivery_api/internal/payments"
-	"github.com/deVamshi/golang_food_delivery_api/internal/tokenverification"
 	"github.com/deVamshi/golang_food_delivery_api/internal/user"
 	"github.com/deVamshi/golang_food_delivery_api/internal/voucher"
 	"github.com/deVamshi/golang_food_delivery_api/pkg/dbcontext"
@@ -99,8 +100,13 @@ func main() {
 		matrixapi.RegisterDistanceMatrixRoutes(v1)
 	}
 
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "4000"
+	}
+
 	server := &http.Server{
-		Addr:    ":8080",
+		Addr:    ":" + port,
 		Handler: r,
 	}
 

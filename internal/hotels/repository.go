@@ -21,17 +21,14 @@ type Repository interface {
 type repository struct {
 	db     *mongo.Database
 	hotels *mongo.Collection
-	ctxt   *context.Context
 }
 
 func NewRepository(ctxt *context.Context, db *mongo.Database) Repository {
-
 	return repository{db: db, hotels: db.Collection(C.HOTELS_COLLECTION)}
-
 }
 
 func (r repository) Create(newHotel *entity.Hotel) error {
-	_, err := r.hotels.InsertOne(*r.ctxt, newHotel)
+	_, err := r.hotels.InsertOne(context.TODO(), newHotel)
 	return err
 }
 
@@ -51,11 +48,11 @@ func getVouchersByRestaurantID(ctx context.Context, voucherCollection *mongo.Col
 func (r repository) GetHotelById(hotelID string) (*entity.Hotel, error) {
 	var hotel entity.Hotel
 	query := bson.D{bson.E{Key: "_id", Value: hotelID}}
-	err := r.hotels.FindOne(*r.ctxt, query).Decode(&hotel)
+	err := r.hotels.FindOne(context.TODO(), query).Decode(&hotel)
 	if err != nil {
 		return nil, err
 	}
-	vouchers, err := getVouchersByRestaurantID(*r.ctxt, r.db.Collection(C.VOUCHERS_COLLECTION), hotelID) // Assuming VoucherCollection is a field in HotelServiceImpl
+	vouchers, err := getVouchersByRestaurantID(context.TODO(), r.db.Collection(C.VOUCHERS_COLLECTION), hotelID) // Assuming VoucherCollection is a field in HotelServiceImpl
 	if err != nil {
 		return nil, err
 	}
@@ -65,11 +62,14 @@ func (r repository) GetHotelById(hotelID string) (*entity.Hotel, error) {
 
 func (r repository) Query() ([]*entity.Hotel, error) {
 	var hotels []*entity.Hotel
-	cursor, err := r.hotels.Find(*r.ctxt, bson.D{{}})
+
+	ctx := context.TODO()
+
+	cursor, err := r.hotels.Find(ctx, bson.D{{}})
 	if err != nil {
 		return nil, err
 	}
-	for cursor.Next(*r.ctxt) {
+	for cursor.Next(ctx) {
 		var hotel entity.Hotel
 		err := cursor.Decode(&hotel)
 		if err != nil {
@@ -82,7 +82,7 @@ func (r repository) Query() ([]*entity.Hotel, error) {
 		return nil, err
 	}
 
-	cursor.Close(*r.ctxt)
+	cursor.Close(ctx)
 
 	if len(hotels) == 0 {
 		return nil, errors.New("no hotels found")
@@ -96,7 +96,7 @@ func (r repository) Update(hotelId string, updateFields map[string]any) error {
 	if len(updateFields) > 0 {
 		updateDoc := bson.D{bson.E{Key: "$set", Value: updateFields}}
 
-		result, err := r.hotels.UpdateOne(*r.ctxt, filter, updateDoc)
+		result, err := r.hotels.UpdateOne(context.TODO(), filter, updateDoc)
 		if err != nil {
 			return err
 		}
@@ -111,7 +111,7 @@ func (r repository) Update(hotelId string, updateFields map[string]any) error {
 
 func (r repository) Delete(hotelID string) error {
 	filter := bson.D{bson.E{Key: "_id", Value: hotelID}}
-	result, err := r.hotels.DeleteOne(*r.ctxt, filter)
+	result, err := r.hotels.DeleteOne(context.TODO(), filter)
 	if err != nil {
 		return err
 	}
