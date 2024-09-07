@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/deVamshi/golang_food_delivery_api/internal/deliveryfee"
 	"github.com/deVamshi/golang_food_delivery_api/internal/fooditem"
@@ -100,8 +101,13 @@ func main() {
 		matrixapi.RegisterDistanceMatrixRoutes(v1)
 	}
 
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "4000"
+	}
+
 	server := &http.Server{
-		Addr:    ":8080",
+		Addr:    ":" + port,
 		Handler: r,
 	}
 
