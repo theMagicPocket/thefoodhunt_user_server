@@ -49,8 +49,6 @@ func (r resource) CreateHotel(ctx *gin.Context) {
 
 func (r resource) GetHotel(ctx *gin.Context) {
 
-	r.logger.Info("GETTING ALL HOTELS")
-
 	hotelId := ctx.Param("id")
 	hotel, err := r.service.GetHotel(hotelId)
 	if err != nil {
