@@ -38,7 +38,7 @@ var (
 func main() {
 	// load env vars
 	ctx = context.Background()
-	APP_ENV, err := godotenv.Read("../.env")
+	APP_ENV, err := godotenv.Read(".env")
 	if err != nil {
 		log.Fatal(err)
 		log.Fatal("Error loading .env file")
