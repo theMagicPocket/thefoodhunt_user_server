@@ -16,7 +16,8 @@ func ValidateFirebaseToken(token string) (string, string, error) {
 		return "extraction of userid failed", "validate failed", fmt.Errorf("error getting current working directory: %v", err)
 	}
 	fmt.Println("Current working directory:", wd)
-	serviceAccountJSON, err := os.ReadFile("/home/teja/Documents/teja2.0/golang_food_delivery_api/firebase.json")
+	// TODO: update file location during deploy
+	serviceAccountJSON, err := os.ReadFile("./firebase.json")
 	if err != nil {
 		return "extraction of userid failed", "validate failed", fmt.Errorf("error reading service account file: %v", err)
 	}
