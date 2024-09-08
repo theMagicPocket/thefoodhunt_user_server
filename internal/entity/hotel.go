@@ -21,7 +21,7 @@ type Hotel struct {
 	CreatedAt string          `bson:"created_at"`
 	UpdatedAt string         `bson:"updated_at"`
     Vouchers  []Voucher       `json:"vouchers" bson:"vouchers"`
-
+    Status bool `json:"status" bson:"status"`
 }
 
 // type Category struct{
