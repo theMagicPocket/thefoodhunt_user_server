@@ -31,6 +31,7 @@ type FoodItem struct {
     IsVeg        bool               `bson:"is_veg" json:"is_veg"`
     Category     string             `bson:"category" json:"category"`
     CreatedAt    string        `bson:"created_at" json:"created_at"`
+    Active bool `bson:"is_active" json:"is_active"`
 }
 
 

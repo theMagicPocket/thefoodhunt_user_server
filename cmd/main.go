@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"os"
 	"time"
-
 	"github.com/deVamshi/golang_food_delivery_api/internal/deliveryfee"
 	"github.com/deVamshi/golang_food_delivery_api/internal/fooditem"
 	"github.com/deVamshi/golang_food_delivery_api/internal/hotels"
@@ -42,7 +41,6 @@ func main() {
 	logger := log.New()
 
 	ctx = context.Background()
-	// load env vars
 	APP_ENV, err := godotenv.Read(".env")
 	if err != nil {
 		logger.Fatal(err)
@@ -112,6 +110,7 @@ func main() {
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  time.Second * 5,
 		WriteTimeout: time.Second * 10,
+
 	}
 
 	// logger.Fatal("unknown error occured")
