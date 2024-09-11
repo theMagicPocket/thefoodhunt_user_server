@@ -125,7 +125,7 @@ func main() {
 	}
 
 	server := &http.Server{
-		Addr:         ":" + port,
+		Addr:         ":" + "4000",
 		Handler:      r,
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  time.Second * 5,
