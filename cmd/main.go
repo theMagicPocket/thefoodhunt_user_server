@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"net/http"
 	"os"
 	"time"
@@ -10,6 +11,7 @@ import (
 	"github.com/deVamshi/golang_food_delivery_api/internal/fooditem"
 	"github.com/deVamshi/golang_food_delivery_api/internal/hotels"
 	"github.com/deVamshi/golang_food_delivery_api/internal/tokenverification"
+	"github.com/joho/godotenv"
 
 	"github.com/deVamshi/golang_food_delivery_api/internal/matrixapi"
 	order "github.com/deVamshi/golang_food_delivery_api/internal/orders"
@@ -19,7 +21,6 @@ import (
 	"github.com/deVamshi/golang_food_delivery_api/pkg/dbcontext"
 	"github.com/deVamshi/golang_food_delivery_api/pkg/log"
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 )
 
 var (
@@ -37,20 +38,38 @@ var (
 	ordercontroller    order.OrderController
 )
 
+type Config struct {
+	MONGODB_URI string
+	SECRET_KEY  string
+	MATRIX_KEY  string
+}
+
 func main() {
 
 	logger := log.New()
 
-	ctx = context.Background()
-	APP_ENV, err := godotenv.Read(".env")
+	err := godotenv.Load()
 	if err != nil {
-		logger.Fatal("Error loading .env file")
-		logger.Fatal(err)
+		logger.Error("Not loading from .env file:\n", err)
 	}
 
+	cfg := Config{}
+
+	flag.StringVar(&cfg.MONGODB_URI, "MONGODB_URI", os.Getenv("MONGODB_URI"), "URI for mongodb")
+	flag.StringVar(&cfg.SECRET_KEY, "SECRET_KEY", os.Getenv("SECRET_KEY"), "secret key")
+	flag.StringVar(&cfg.MATRIX_KEY, "MATRIX_KEY", os.Getenv("MATRIX_KEY"), "matrix key")
+
+	flag.Parse()
+
+	ctx = context.Background()
 	r := gin.Default()
 
-	dbClient, err := dbcontext.ConnectDB(APP_ENV["MONGOURI"])
+	MONGO_URI := cfg.MONGODB_URI
+	if MONGO_URI == "" {
+		logger.Fatal("mongouri is empty")
+	}
+	logger.Info("MONGOURI", MONGO_URI)
+	dbClient, err := dbcontext.ConnectDB(MONGO_URI)
 	defer func() {
 		if err := dbcontext.DisconnectDB(); err != nil {
 			logger.Fatal(err)

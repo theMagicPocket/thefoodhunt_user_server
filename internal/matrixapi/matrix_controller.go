@@ -5,29 +5,29 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/deVamshi/golang_food_delivery_api/internal/entity"
 	"github.com/gin-gonic/gin"
 	"github.com/go-resty/resty/v2"
-	"github.com/joho/godotenv"
-	
 )
 
 func distance(c *gin.Context) {
-    var req entity.DistanceRequest
-    if err := c.ShouldBindJSON(&req); err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-        return
-    }
+	var req entity.DistanceRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	origin := fmt.Sprintf("%f,%f", req.Lat1, req.Lng1)
 	destination := fmt.Sprintf("%f,%f", req.Lat2, req.Lng2)
-	APP_ENV, err := godotenv.Read("../.env")
-	if err != nil {
-		log.Fatal(err)
-		log.Fatal("Error loading .env file")
-	}
-	apiKey := APP_ENV["MATRIX_KEY"]
+	// APP_ENV, err := godotenv.Read("../.env")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// 	log.Fatal("Error loading .env file")
+	// }
+	// TODO: this won't work
+	apiKey := os.Getenv("MATRIX_KEY")
 
 	url := fmt.Sprintf("https://maps.googleapis.com/maps/api/distancematrix/json?origins=%s&destinations=%s&key=%s", origin, destination, apiKey)
 	client := resty.New()
