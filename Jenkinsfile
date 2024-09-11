@@ -23,7 +23,7 @@ pipeline {
 
                 sh '''
                     go version
-                    go run cmd/main.go --MONGODB_URI=$MONGODB_URI
+                    export JENKINS_NODE_COOKIE=dontKillMe;go run cmd/main.go --MONGODB_URI=$MONGODB_URI &
                 '''
             }
         }
