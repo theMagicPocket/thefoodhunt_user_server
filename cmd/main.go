@@ -82,7 +82,7 @@ func main() {
 	}
 
 	r.GET("/", func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, gin.H{"status": "ok", "message": "welcome to yummy-foods"})
+		ctx.JSON(http.StatusOK, gin.H{"status": "ok", "message": "welcome"})
 	})
 
 	v1 := r.Group("/v1")
