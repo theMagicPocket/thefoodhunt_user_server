@@ -7,7 +7,7 @@ pipeline {
     }
 
     environment {
-        MONGODB_URI=credentials('yumfoods_mongouri')
+        MONGODB_URI=credentials('yumfoods_mongodb_uri')
         SECRET_KEY=credentials('yumfoods_secret_key')
         MATRIX_KEY=credentials('yumfoods_matrix_key')
     }
