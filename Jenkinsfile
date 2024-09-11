@@ -23,7 +23,7 @@ pipeline {
                 sh '''
                     echo "running"
                     go version
-                    sudo fuser -k -n tcp 4000
+                    fuser -k -n tcp 4000
                     export JENKINS_NODE_COOKIE=dontKillMe;go run cmd/main.go --MONGODB_URI=$MONGODB_URI --SECRET_KEY=$SECRET_KEY --MATRIX_KEY=$MATRIX_KEY &
                 '''
             }
