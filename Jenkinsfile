@@ -2,14 +2,14 @@ pipeline {
 
     agent any
 
-    // tools {
-    //     go '1.23.1'
-    // }
-
     environment {
         MONGODB_URI=credentials('yumfoods_mongodb_uri')
         SECRET_KEY=credentials('yumfoods_secret_key')
         MATRIX_KEY=credentials('yumfoods_matrix_key')
+    }
+
+    tools {
+        go '1.23.1'
     }
 
     stages {
@@ -18,7 +18,21 @@ pipeline {
             steps {
                 sh '''
                     imgs=$(docker images -q)
-                    docker rmi -f $imgs
+                    if [ -n "$imgs" ]; then
+                        echo "cleaning previous docker images"
+                        docker rmi -f $imgs
+                    fi
+
+                    allcntrs=$(docker ps --all -q)
+                    if [ -n "$allcntrs" ]; then
+                        runcntrs=$(docker ps -q)
+                        if [ -n "$runcntrs" ]; then
+                            echo "stopping running containers"
+                            docker stop $runcntrs
+                        fi
+                        echo "removing all containers"
+                        docker rm allcntrs
+                    fi
                 '''
             }
         }
@@ -39,9 +53,7 @@ pipeline {
 
         stage('run') {
             steps {
-                sh '''
-                    export JENKINS_NODE_COOKIE=dontKillMe;docker run -d -p 4000:4000 -e "PORT=4000" -e 'MONGODB_URI=$MONGODB_URI' -e 'MATRIX_KEY=$MATRIX_KEY' -e 'SECRET_KEY=$SECRET_KEY' yumfoods:latest
-                '''
+                sh "export JENKINS_NODE_COOKIE=dontKillMe;docker run -d -p 4000:4000 -e 'PORT=4000' -e 'MONGODB_URI=$MONGODB_URI' -e 'MATRIX_KEY=$MATRIX_KEY' -e 'SECRET_KEY=$SECRET_KEY' yumfoods:latest"
             }
         }
 
