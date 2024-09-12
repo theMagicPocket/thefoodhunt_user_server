@@ -14,13 +14,14 @@ pipeline {
 
     stages {
 
-        // stage('cleanup') {
-        //     steps {
-        //         sh '''
-        //             docker rmi $(docker images -q) -f
-        //         '''
-        //     }
-        // }
+        stage('cleanup') {
+            steps {
+                sh '''
+                    imgs=$(docker images -q)
+                    docker rmi -f $imgs
+                '''
+            }
+        }
 
         stage('clone') {
             steps {
@@ -39,7 +40,7 @@ pipeline {
         stage('run') {
             steps {
                 sh '''
-                    docker run -d -p 4000:4000 -e "PORT=4000" -e 'MONGODB_URI=$MONGODB_URI' -e 'MATRIX_KEY=$MATRIX_KEY' -e 'SECRET_KEY=$SECRET_KEY' yumfoods:latest
+                    export JENKINS_NODE_COOKIE=dontKillMe;docker run -d -p 4000:4000 -e "PORT=4000" -e 'MONGODB_URI=$MONGODB_URI' -e 'MATRIX_KEY=$MATRIX_KEY' -e 'SECRET_KEY=$SECRET_KEY' yumfoods:latest
                 '''
             }
         }
