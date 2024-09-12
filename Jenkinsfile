@@ -39,7 +39,7 @@ pipeline {
         stage('run') {
             steps {
                 sh '''
-                    docker run -d -p 4000:4001 -e "PORT=4001" -e 'MONGODB_URI=$MONGODB_URI' -e 'MATRIX_KEY=$MATRIX_KEY' -e 'SECRET_KEY=$SECRET_KEY' yumfoods:latest
+                    docker run -d -p 4000:4000 -e "PORT=4000" -e 'MONGODB_URI=$MONGODB_URI' -e 'MATRIX_KEY=$MATRIX_KEY' -e 'SECRET_KEY=$SECRET_KEY' yumfoods:latest
                 '''
             }
         }
