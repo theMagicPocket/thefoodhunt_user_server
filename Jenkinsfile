@@ -14,13 +14,13 @@ pipeline {
 
     stages {
 
-        stage('cleanup') {
-            steps {
-                sh '''
-                    docker rmi $(docker images -q) -f
-                '''
-            }
-        }
+        // stage('cleanup') {
+        //     steps {
+        //         sh '''
+        //             docker rmi $(docker images -q) -f
+        //         '''
+        //     }
+        // }
 
         stage('clone') {
             steps {
