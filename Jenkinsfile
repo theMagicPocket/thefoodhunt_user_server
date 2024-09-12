@@ -31,7 +31,7 @@ pipeline {
                             docker stop $runcntrs
                         fi
                         echo "removing all containers"
-                        docker rm allcntrs
+                        docker rm $allcntrs
                     fi
                 '''
             }
