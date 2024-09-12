@@ -2,9 +2,9 @@ pipeline {
 
     agent any
 
-    tools {
-        go '1.23.1'
-    }
+    // tools {
+    //     go '1.23.1'
+    // }
 
     environment {
         MONGODB_URI=credentials('yumfoods_mongodb_uri')
@@ -13,29 +13,36 @@ pipeline {
     }
 
     stages {
-        stage('clone') {
-        steps {
-                git branch: 'refactor', credentialsId: 'jenkins-food-api-github-token', url: 'https://github.com/deVamshi/golang_food_delivery_api/'
-            }
-        }
-        stage('run') {
+
+        stage('cleanup') {
             steps {
                 sh '''
-                    echo "running"
-                    go version
-                    export JENKINS_NODE_COOKIE=dontKillMe;go run cmd/main.go --MONGODB_URI=$MONGODB_URI --SECRET_KEY=$SECRET_KEY --MATRIX_KEY=$MATRIX_KEY &
+                    docker rmi $(docker images -q) -f
                 '''
-                // fuser -k -n tcp 4000
             }
         }
 
-    }
-    post {
-        success {
-            echo 'build success'
+        stage('clone') {
+            steps {
+                    git branch: 'refactor', credentialsId: 'jenkins-food-api-github-token', url: 'https://github.com/deVamshi/golang_food_delivery_api/'
+                }
         }
-        failure {
-            echo 'build failed'
+
+        stage ('build') {
+            steps {
+                sh '''
+                    docker build --tag yumfoods:latest .
+                '''
+            }
         }
+
+        stage('run') {
+            steps {
+                sh '''
+                    docker run -d -p 4000:4001 -e "PORT=4001" -e 'MONGODB_URI=$MONGODB_URI' -e 'MATRIX_KEY=$MATRIX_KEY' -e 'SECRET_KEY=$SECRET_KEY' yumfoods:latest
+                '''
+            }
+        }
+
     }
 }

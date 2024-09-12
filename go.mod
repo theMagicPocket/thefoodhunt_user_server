@@ -1,6 +1,6 @@
 module github.com/deVamshi/golang_food_delivery_api
 
-go 1.22.3
+go 1.23.1
 
 require (
 	firebase.google.com/go v3.13.0+incompatible

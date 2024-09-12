@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"net/http"
 	"os"
 	"time"
@@ -42,6 +43,7 @@ type Config struct {
 	MONGODB_URI string
 	SECRET_KEY  string
 	MATRIX_KEY  string
+	PORT        string
 }
 
 func main() {
@@ -58,6 +60,7 @@ func main() {
 	flag.StringVar(&cfg.MONGODB_URI, "MONGODB_URI", os.Getenv("MONGODB_URI"), "URI for mongodb")
 	flag.StringVar(&cfg.SECRET_KEY, "SECRET_KEY", os.Getenv("SECRET_KEY"), "secret key")
 	flag.StringVar(&cfg.MATRIX_KEY, "MATRIX_KEY", os.Getenv("MATRIX_KEY"), "matrix key")
+	flag.StringVar(&cfg.PORT, "PORT", os.Getenv("PORT"), "port on which to run the server")
 
 	flag.Parse()
 
@@ -82,7 +85,7 @@ func main() {
 	}
 
 	r.GET("/", func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, gin.H{"status": "ok", "message": "welcome, this is yumfoods"})
+		ctx.JSON(http.StatusOK, gin.H{"status": "ok", "message": "hi"})
 	})
 
 	v1 := r.Group("/v1")
@@ -119,13 +122,8 @@ func main() {
 		matrixapi.RegisterDistanceMatrixRoutes(v1)
 	}
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "4000"
-	}
-
 	server := &http.Server{
-		Addr:         ":" + port,
+		Addr:         ":" + cfg.PORT,
 		Handler:      r,
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  time.Second * 5,
@@ -134,6 +132,7 @@ func main() {
 
 	// logger.Fatal("unknown error occured")
 
+	logger.Info(fmt.Sprintf("listening on http://localhost:%s", cfg.PORT))
 	err = server.ListenAndServe()
 	logger.Fatal(err)
 }
