@@ -17,12 +17,6 @@ pipeline {
         stage('cleanup') {
             steps {
                 sh '''
-                    imgs=$(docker images -q)
-                    if [ -n "$imgs" ]; then
-                        echo "cleaning previous docker images"
-                        docker rmi -f $imgs
-                    fi
-
                     allcntrs=$(docker ps --all -q)
                     if [ -n "$allcntrs" ]; then
                         runcntrs=$(docker ps -q)
@@ -32,6 +26,12 @@ pipeline {
                         fi
                         echo "removing all containers"
                         docker rm $allcntrs
+                    fi
+
+                    imgs=$(docker images -q)
+                    if [ -n "$imgs" ]; then
+                        echo "cleaning previous docker images"
+                        docker rmi -f $imgs
                     fi
                 '''
             }
