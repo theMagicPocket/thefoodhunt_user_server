@@ -26,7 +26,7 @@ func distance(c *gin.Context) {
 	// 	log.Fatal(err)
 	// 	log.Fatal("Error loading .env file")
 	// }
-	// TODO: this won't work
+	// TODO: this should work now, as i'm passing env var to docker container
 	apiKey := os.Getenv("MATRIX_KEY")
 
 	url := fmt.Sprintf("https://maps.googleapis.com/maps/api/distancematrix/json?origins=%s&destinations=%s&key=%s", origin, destination, apiKey)

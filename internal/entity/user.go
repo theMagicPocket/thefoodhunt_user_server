@@ -1,6 +1,7 @@
 package entity
 
 type UserAddress struct {
+	ID          string `bson:"id" json:"id" binding:"required"`
 	Lat         string `bson:"lat,omitempty" json:"latitude,omitempty"`
 	Long        string `bson:"long,omitempty" json:"longitude,omitempty"`
 	Street      string `bson:"street,omitempty" json:"street,omitempty"`

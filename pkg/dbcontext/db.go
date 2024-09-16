@@ -7,6 +7,18 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+type DB struct {
+	db *mongo.Database
+}
+
+func New(mongodb *mongo.Database) *DB {
+	return &DB{db: mongodb}
+}
+
+func (db *DB) DB() *mongo.Database {
+	return db.db
+}
+
 var mongoClient *mongo.Client
 
 func ConnectDB(uri string) (*mongo.Database, error) {

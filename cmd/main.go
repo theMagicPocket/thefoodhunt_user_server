@@ -8,10 +8,10 @@ import (
 	"os"
 	"time"
 
+	"github.com/deVamshi/golang_food_delivery_api/internal/address"
 	"github.com/deVamshi/golang_food_delivery_api/internal/deliveryfee"
 	"github.com/deVamshi/golang_food_delivery_api/internal/fooditem"
 	"github.com/deVamshi/golang_food_delivery_api/internal/hotels"
-	"github.com/deVamshi/golang_food_delivery_api/internal/tokenverification"
 	"github.com/joho/godotenv"
 
 	"github.com/deVamshi/golang_food_delivery_api/internal/matrixapi"
@@ -79,18 +79,20 @@ func main() {
 		}
 		logger.Info("Disconnected to DB\nBye!")
 	}()
-
 	if err != nil {
 		logger.Fatal(err)
 	}
 
+	appDB := dbcontext.New(dbClient)
+
+	// validator
 	r.GET("/", func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, gin.H{"status": "ok", "message": "hi"})
 	})
 
 	v1 := r.Group("/v1")
 	{
-		v1.Use(tokenverification.AuthMiddleware())
+		// v1.Use(tokenverification.AuthMiddleware())
 		// hotel.RegisterHandlers(v1, hotel.NewService(hotel.NewRepository(dbClient)))
 		// vouchers
 		var voucherscollection = dbClient.Collection("vouchers")
@@ -120,6 +122,16 @@ func main() {
 		deliveryfee.RegisterDistanceRoutes(v1)
 		// exact distance calculation using google matrix api
 		matrixapi.RegisterDistanceMatrixRoutes(v1)
+
+		// address routes
+		address.RegisterHandlers(
+			v1,
+			address.NewService(
+				address.NewRepository(appDB),
+			),
+			&logger,
+		)
+
 	}
 
 	server := &http.Server{

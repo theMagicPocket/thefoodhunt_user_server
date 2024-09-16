@@ -4,9 +4,9 @@ import (
 	"errors"
 	"strconv"
 
-	U "github.com/deVamshi/golang_food_delivery_api/internal"
 	"github.com/deVamshi/golang_food_delivery_api/internal/entity"
 	"github.com/deVamshi/golang_food_delivery_api/pkg/log"
+	"github.com/deVamshi/golang_food_delivery_api/pkg/utils"
 )
 
 type Service interface {
@@ -98,7 +98,7 @@ func (s service) GetNearbyHotels(userLat, userLong, dist float64) ([]*entity.Hot
 		}
 
 		// Calculate the distance to the user's coordinates
-		distance := U.HaversineDistance(userLat, userLong, hotelLat, hotelLong)
+		distance := utils.HaversineDistance(userLat, userLong, hotelLat, hotelLong)
 		if distance <= dist {
 			result = append(result, h)
 		}
