@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/deVamshi/golang_food_delivery_api/internal/entity"
 	appErr "github.com/deVamshi/golang_food_delivery_api/internal/errors"
 	"github.com/deVamshi/golang_food_delivery_api/pkg/log"
 	"github.com/gin-gonic/gin"
@@ -21,7 +22,7 @@ func RegisterHandlers(rg *gin.RouterGroup, service Service, logger *log.AppLogge
 	r := rg.Group("/address")
 
 	r.POST("/:userId", res.create)
-	r.PUT("/:userId", res.update)
+	r.PUT("/:userId/", res.update)
 	r.DELETE("/:userId/:addressId", res.delete)
 }
 
@@ -35,7 +36,7 @@ func (r *resource) create(ctx *gin.Context) {
 
 	var addAddressReq AddOrUpdateAddressRequest
 	if err := ctx.ShouldBindJSON(&addAddressReq); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, entity.NotOk(err.Error()))
 		return
 	}
 
@@ -43,10 +44,10 @@ func (r *resource) create(ctx *gin.Context) {
 
 	if err != nil {
 		if errors.Is(err, appErr.ErrNoDocuments) {
-			ctx.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
+			ctx.AbortWithStatusJSON(http.StatusBadRequest, entity.NotOk(err.Error()))
 			return
 		}
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, err.Error())
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, entity.NotOk(err.Error()))
 		return
 	}
 
@@ -63,7 +64,7 @@ func (r *resource) update(ctx *gin.Context) {
 
 	var addAddressReq AddOrUpdateAddressRequest
 	if err := ctx.ShouldBindJSON(&addAddressReq); err != nil {
-		ctx.AbortWithStatusJSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
+		ctx.AbortWithStatusJSON(http.StatusUnprocessableEntity, entity.NotOk(err.Error()))
 		return
 	}
 
@@ -71,10 +72,10 @@ func (r *resource) update(ctx *gin.Context) {
 
 	if err != nil {
 		if errors.Is(err, appErr.ErrNoDocuments) {
-			ctx.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
+			ctx.AbortWithStatusJSON(http.StatusBadRequest, entity.NotOk(err.Error()))
 			return
 		}
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, err.Error())
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, entity.NotOk(err.Error()))
 		return
 	}
 
@@ -95,21 +96,16 @@ func (r *resource) delete(ctx *gin.Context) {
 		return
 	}
 
-	isDeleted, err := r.service.Delete(ctx, userId, addressId)
+	_, err := r.service.Delete(ctx, userId, addressId)
 
 	if err != nil {
 		if errors.Is(err, appErr.ErrNoDocuments) {
-			ctx.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
+			ctx.AbortWithStatusJSON(http.StatusBadRequest, entity.NotOk(err.Error()))
 			return
 		}
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, err.Error())
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, entity.NotOk(err.Error()))
 		return
 	}
 
-	if !isDeleted {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "no address deleted, check the id"})
-		return
-	}
-
-	ctx.JSON(http.StatusOK, gin.H{"messsage": "deleted the address"})
+	ctx.JSON(http.StatusOK, entity.Ok("address deleted", nil))
 }

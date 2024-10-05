@@ -12,6 +12,8 @@ import (
 	"github.com/deVamshi/golang_food_delivery_api/internal/deliveryfee"
 	"github.com/deVamshi/golang_food_delivery_api/internal/fooditem"
 	"github.com/deVamshi/golang_food_delivery_api/internal/hotels"
+	"github.com/deVamshi/golang_food_delivery_api/internal/tokenverification"
+	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
 
 	"github.com/deVamshi/golang_food_delivery_api/internal/matrixapi"
@@ -86,13 +88,15 @@ func main() {
 	appDB := dbcontext.New(dbClient)
 
 	// validator
+	validator := validator.New(validator.WithRequiredStructEnabled())
+
 	r.GET("/", func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, gin.H{"status": "ok", "message": "hi"})
 	})
 
 	v1 := r.Group("/v1")
 	{
-		// v1.Use(tokenverification.AuthMiddleware())
+		v1.Use(tokenverification.AuthMiddleware())
 		// hotel.RegisterHandlers(v1, hotel.NewService(hotel.NewRepository(dbClient)))
 		// vouchers
 		var voucherscollection = dbClient.Collection("vouchers")
@@ -128,6 +132,7 @@ func main() {
 			v1,
 			address.NewService(
 				address.NewRepository(appDB),
+				validator,
 			),
 			&logger,
 		)

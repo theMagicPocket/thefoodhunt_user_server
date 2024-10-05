@@ -8,6 +8,7 @@ import (
 	"github.com/deVamshi/golang_food_delivery_api/internal/entity"
 	appErr "github.com/deVamshi/golang_food_delivery_api/internal/errors"
 	"github.com/deVamshi/golang_food_delivery_api/pkg/dbcontext"
+	"github.com/deVamshi/golang_food_delivery_api/pkg/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -25,7 +26,7 @@ func NewRepository(db *dbcontext.DB) Repository {
 	return repository{db: db}
 }
 
-func (r repository) AddOrUpdate(ctx context.Context, userId string, address entity.UserAddress) (*entity.User, error) {
+func (r repository) AddOrUpdate(ctx context.Context, userId string, updatedAddress entity.UserAddress) (*entity.User, error) {
 
 	user, err := getUser(ctx, r.db, userId)
 	if err != nil {
@@ -38,7 +39,7 @@ func (r repository) AddOrUpdate(ctx context.Context, userId string, address enti
 
 	foundIdx := -1
 	for id, adrs := range user.UserAddress {
-		if adrs.ID == address.ID {
+		if adrs.ID == updatedAddress.ID {
 			foundIdx = id
 			break
 		}
@@ -46,10 +47,10 @@ func (r repository) AddOrUpdate(ctx context.Context, userId string, address enti
 
 	if foundIdx == -1 {
 		// address not found, adding
-		user.UserAddress = append(user.UserAddress, address)
+		user.UserAddress = append(user.UserAddress, updatedAddress)
 	} else {
 		// address found, updating
-		user.UserAddress[foundIdx] = address
+		err = utils.UpdateStruct(&user.UserAddress[foundIdx], &updatedAddress)
 	}
 
 	update := bson.D{bson.E{Key: "$set", Value: user}}
@@ -84,9 +85,13 @@ func (r repository) Delete(ctx context.Context, userId string, addressId string)
 	}
 
 	update := bson.D{bson.E{Key: "$set", Value: user}}
-	_, err = r.db.DB().Collection(K.USERS_COLLECTION).UpdateByID(ctx, userId, update)
+	res, err := r.db.DB().Collection(K.USERS_COLLECTION).UpdateByID(ctx, userId, update)
 	if err != nil {
 		return false, err
+	}
+
+	if res.ModifiedCount == 0 {
+		return false, errors.New("no address deleted, check the address id")
 	}
 
 	return true, nil

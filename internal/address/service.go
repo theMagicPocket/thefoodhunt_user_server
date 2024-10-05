@@ -2,9 +2,11 @@ package address
 
 import (
 	"context"
+	"errors"
 
 	"github.com/deVamshi/golang_food_delivery_api/internal/entity"
 	"github.com/deVamshi/golang_food_delivery_api/pkg/utils"
+	"github.com/go-playground/validator/v10"
 )
 
 type Service interface {
@@ -14,35 +16,44 @@ type Service interface {
 }
 
 type service struct {
-	repo Repository
+	repo      Repository
+	validator *validator.Validate
 }
 
-func NewService(repo Repository) Service {
-	return &service{repo: repo}
+func NewService(repo Repository, v *validator.Validate) Service {
+	return &service{repo: repo, validator: v}
 }
 
 type AddOrUpdateAddressRequest struct {
-	ID          string `json:"id,omitempty"`
-	Lat         string `json:"latitude" binding:"required"`
-	Long        string `json:"longitude" binding:"required"`
-	Street      string `json:"street" binding:"required"`
-	DoorNo      string `json:"doorno" binding:"required"`
-	Pincode     string `json:"pincode" binding:"required"`
-	Name        string `json:"name" binding:"required"`
-	PhoneNumber string `json:"phone_number" binding:"required,len=10,numeric"`
-	Landmark    string `json:"landmark,omitempty" `
-	IsActive    bool   `json:"is_active,omitempty"`
+	ID          string `json:"id,omitempty" validate:"required"`
+	Lat         string `json:"latitude" validate:"required"`
+	Long        string `json:"longitude" validate:"required"`
+	Street      string `json:"street" validate:"required"`
+	DoorNo      string `json:"doorno" validate:"required"`
+	Pincode     string `json:"pincode" validate:"required"`
+	Name        string `json:"name" validate:"required"`
+	PhoneNumber string `json:"phone_number" validate:"required,len=10,numeric"`
+	Landmark    string `json:"landmark,omitempty" validate:"required"`
+	IsActive    bool   `json:"is_active"  validate:"boolean"`
 }
 
 func (s *service) Add(ctx context.Context, id string, adrs *AddOrUpdateAddressRequest) (*entity.User, error) {
 
 	adrs.ID = utils.GenerateID()
-	addrsToAdd := entity.UserAddress(*adrs)
-
-	return s.repo.AddOrUpdate(ctx, (id), addrsToAdd)
+	err := s.validator.Struct(adrs)
+	if err != nil {
+		return nil, err
+	}
+	return s.repo.AddOrUpdate(ctx, (id), entity.UserAddress(*adrs))
 }
 
 func (s *service) Update(ctx context.Context, id string, adrs *AddOrUpdateAddressRequest) (*entity.User, error) {
+
+	// TODO: need to add validations for this, add binding field in the struct tag
+
+	if adrs.ID == "" {
+		return nil, errors.New("address id missing")
+	}
 
 	addrsToUpdate := entity.UserAddress(*adrs)
 

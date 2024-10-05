@@ -1,8 +1,10 @@
 package utils
 
 import (
+	"fmt"
 	"math"
 	"math/rand"
+	"reflect"
 )
 
 const earthRadiusKm = 6371
@@ -30,4 +32,29 @@ func GenerateID() string {
 		b[i] = letterRunes[rand.Intn(len(letterRunes))]
 	}
 	return string(b)
+}
+
+// pass pointers to structs
+func UpdateStruct(target interface{}, updates interface{}) error {
+	targetVal := reflect.ValueOf(target).Elem()
+	updatesVal := reflect.ValueOf(updates).Elem()
+
+	if targetVal.Kind() != reflect.Struct || updatesVal.Kind() != reflect.Struct {
+		return fmt.Errorf("both arguments must be pointers to structs")
+	}
+
+	for i := 0; i < updatesVal.NumField(); i++ {
+		field := updatesVal.Type().Field(i)
+		updateField := updatesVal.Field(i)
+
+		if updateField.IsZero() {
+			continue
+		}
+
+		targetField := targetVal.FieldByName(field.Name)
+		if targetField.IsValid() && targetField.CanSet() {
+			targetField.Set(updateField)
+		}
+	}
+	return nil
 }
