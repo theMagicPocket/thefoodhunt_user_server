@@ -39,7 +39,7 @@ pipeline {
 
         stage('clone') {
             steps {
-                    git branch: 'refactor', credentialsId: 'jenkins-food-api-github-token', url: 'https://github.com/deVamshi/golang_food_delivery_api/'
+                    git branch: 'refactor', credentialsId: 'jenkins_food_hunt_user_server', url: 'https://github.com/theMagicPocket/thefoodhunt_user_server.git'
                 }
         }
 
