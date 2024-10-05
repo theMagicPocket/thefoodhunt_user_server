@@ -34,7 +34,7 @@ pipeline {
                         docker rmi -f $imgs
                     fi
 
-                    docker system prune -a
+                    docker system prune -af
                 '''
             }
         }
