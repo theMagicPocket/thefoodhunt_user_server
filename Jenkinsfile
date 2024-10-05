@@ -33,6 +33,8 @@ pipeline {
                         echo "cleaning previous docker images"
                         docker rmi -f $imgs
                     fi
+
+                    docker system prune -a
                 '''
             }
         }
