@@ -16,10 +16,10 @@ func AuthMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		userId , _, err := ValidateFirebaseToken(token)
+		userId, _, err := ValidateFirebaseToken(token)
 		if err != nil {
 			log.Println(err)
-			
+
 			c.JSON(http.StatusForbidden, gin.H{"error": "Unauthorized"})
 			c.Abort()
 			return

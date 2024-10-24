@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"encoding/json"
 	"fmt"
 	"math"
 	"math/rand"
@@ -57,4 +58,15 @@ func UpdateStruct(target interface{}, updates interface{}) error {
 		}
 	}
 	return nil
+}
+
+func StructToMap(obj interface{}) (newMap map[string]interface{}, err error) {
+	data, err := json.Marshal(obj) // Convert to a json string
+
+	if err != nil {
+		return
+	}
+
+	err = json.Unmarshal(data, &newMap) // Convert to a map
+	return
 }

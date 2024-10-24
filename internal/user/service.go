@@ -7,6 +7,7 @@ import (
 
 	"github.com/deVamshi/golang_food_delivery_api/internal/entity"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -16,8 +17,9 @@ type UserServiceImpl struct {
 }
 
 type UserService interface {
-	CreateUser(*entity.User) error
-	GetUser(*string) (*entity.User, error)
+	CreateUser(*entity.User) (*entity.User, error)
+	GetUserByAuthId(*string) (*entity.User, error)
+	GetUserById(*string) (*entity.User, error)
 	GetAll() ([]*entity.User, error)
 	UpdateUser(*entity.User) error
 	DeleteUser(*string) error
@@ -32,24 +34,53 @@ func NewUserService(userCollection *mongo.Collection, ctx context.Context) UserS
 
 var ErrEmailExists = errors.New("email already in use")
 
-func (u *UserServiceImpl) CreateUser(user *entity.User) error {
+func (u *UserServiceImpl) CreateUser(user *entity.User) (*entity.User, error) {
 	var existingUser entity.User
+	fmt.Println(user.Email)
 	err := u.userCollection.FindOne(u.ctx, bson.M{"email": user.Email}).Decode(&existingUser)
 	if err == nil {
 		// Email already exists
-		return ErrEmailExists
-	} else if err != mongo.ErrNoDocuments {
-		// An error occurred other than "no documents found"
-		return err
+		return nil, ErrEmailExists
 	}
-	_, errr := u.userCollection.InsertOne(u.ctx, user)
-	return errr
+	if err != mongo.ErrNoDocuments {
+		return nil, err
+	}
+
+	fmt.Println(err)
+
+	res, errr := u.userCollection.InsertOne(u.ctx, user)
+	if errr != nil {
+		return nil, errr
+	}
+
+	oId, ok := res.InsertedID.(primitive.ObjectID)
+	if !ok {
+		return nil, errors.New("error while converting InsertedId to ObjectId")
+	}
+
+	hexId := oId.Hex()
+
+	return u.GetUserById(&hexId)
 }
 
-func (u *UserServiceImpl) GetUser(userId *string) (*entity.User, error) {
+func (u *UserServiceImpl) GetUserByAuthId(userId *string) (*entity.User, error) {
 	var user *entity.User
-	query := bson.D{bson.E{Key: "_id", Value: userId}}
+	query := bson.D{bson.E{Key: "auth_id", Value: userId}}
 	err := u.userCollection.FindOne(u.ctx, query).Decode(&user)
+	return user, err
+}
+
+func (u *UserServiceImpl) GetUserById(userId *string) (*entity.User, error) {
+
+	oId, err := primitive.ObjectIDFromHex(*userId)
+	if err != nil {
+		return nil, err
+	}
+
+	var user *entity.User
+	query := bson.D{bson.E{Key: "_id", Value: oId}}
+
+	err = u.userCollection.FindOne(u.ctx, query).Decode(&user)
 	return user, err
 }
 
@@ -81,7 +112,13 @@ func (u *UserServiceImpl) GetAll() ([]*entity.User, error) {
 }
 
 func (u *UserServiceImpl) UpdateUser(user *entity.User) error {
-	filter := bson.D{bson.E{Key: "_id", Value: user.ID}}
+
+	oId, err := primitive.ObjectIDFromHex(user.Id)
+	if err != nil {
+		return err
+	}
+
+	filter := bson.D{bson.E{Key: "_id", Value: oId}}
 
 	// Initialize an empty map for the update document
 	updateFields := make(map[string]interface{})
@@ -152,7 +189,13 @@ func (u *UserServiceImpl) UpdateUser(user *entity.User) error {
 }
 
 func (u *UserServiceImpl) DeleteUser(userId *string) error {
-	filter := bson.D{bson.E{Key: "_id", Value: userId}}
+
+	oId, err := primitive.ObjectIDFromHex(*userId)
+	if err != nil {
+		return err
+	}
+
+	filter := bson.D{bson.E{Key: "_id", Value: oId}}
 	result, _ := u.userCollection.DeleteOne(u.ctx, filter)
 	if result.DeletedCount != 1 {
 		return errors.New("no matched document found for delete")

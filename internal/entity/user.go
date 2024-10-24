@@ -15,7 +15,8 @@ type UserAddress struct {
 
 // User represents a user with related details.
 type User struct {
-	ID           string        `bson:"_id,omitempty" json:"user_id,omitempty"`
+	Id           string        `bson:"_id,omitempty" json:"id"`
+	AuthId       string        `bson:"auth_id" json:"auth_id"`
 	Name         string        `bson:"name" json:"name"`
 	Email        string        `bson:"email" json:"email"`
 	Phone        string        `bson:"phone" json:"phone"`

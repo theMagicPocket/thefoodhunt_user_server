@@ -3,6 +3,7 @@ package address
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	K "github.com/deVamshi/golang_food_delivery_api/internal/constants"
 	"github.com/deVamshi/golang_food_delivery_api/internal/entity"
@@ -10,6 +11,7 @@ import (
 	"github.com/deVamshi/golang_food_delivery_api/pkg/dbcontext"
 	"github.com/deVamshi/golang_food_delivery_api/pkg/utils"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -53,11 +55,24 @@ func (r repository) AddOrUpdate(ctx context.Context, userId string, updatedAddre
 		err = utils.UpdateStruct(&user.UserAddress[foundIdx], &updatedAddress)
 	}
 
-	update := bson.D{bson.E{Key: "$set", Value: user}}
-	_, err = r.db.DB().Collection(K.USERS_COLLECTION).UpdateByID(ctx, userId, update)
+	oId, err := primitive.ObjectIDFromHex(userId)
 	if err != nil {
 		return nil, err
 	}
+
+	updateFields, err := utils.StructToMap(user)
+	if err != nil {
+		return nil, err
+	}
+	// if we don't delete this key, mongo gives us write exception, as id is not mutable
+	delete(updateFields, "id")
+	update := bson.D{bson.E{Key: "$set", Value: updateFields}}
+	res, err := r.db.DB().Collection(K.USERS_COLLECTION).UpdateByID(ctx, oId, update)
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println(res.MatchedCount)
 
 	return user, nil
 }
@@ -103,9 +118,13 @@ func getUser(ctx context.Context, db *dbcontext.DB, userId string) (*entity.User
 	var user entity.User
 	usersColl := db.DB().Collection(K.USERS_COLLECTION)
 
-	filter := bson.D{bson.E{Key: "_id", Value: userId}}
+	oId, err := primitive.ObjectIDFromHex(userId)
+	if err != nil {
+		return nil, err
+	}
 
-	err := usersColl.FindOne(ctx, filter).Decode(&user)
+	filter := bson.D{bson.E{Key: "_id", Value: oId}}
+	err = usersColl.FindOne(ctx, filter).Decode(&user)
 
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {

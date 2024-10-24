@@ -44,7 +44,7 @@ func (s *service) Add(ctx context.Context, id string, adrs *AddOrUpdateAddressRe
 	if err != nil {
 		return nil, err
 	}
-	return s.repo.AddOrUpdate(ctx, (id), entity.UserAddress(*adrs))
+	return s.repo.AddOrUpdate(ctx, id, entity.UserAddress(*adrs))
 }
 
 func (s *service) Update(ctx context.Context, id string, adrs *AddOrUpdateAddressRequest) (*entity.User, error) {
@@ -57,7 +57,7 @@ func (s *service) Update(ctx context.Context, id string, adrs *AddOrUpdateAddres
 
 	addrsToUpdate := entity.UserAddress(*adrs)
 
-	return s.repo.AddOrUpdate(ctx, (id), addrsToUpdate)
+	return s.repo.AddOrUpdate(ctx, id, addrsToUpdate)
 }
 
 func (s *service) Delete(ctx context.Context, userId string, addressId string) (bool, error) {
